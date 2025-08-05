@@ -21,6 +21,15 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'doctor', 'nurse', 'patient'],
     required: true,
     default: 'patient'
+  },
+  // Add these two fields for forgot password feature
+  resetPasswordToken: {
+    type: String,
+    default: null
+  },
+  resetPasswordExpire: {
+    type: Date,
+    default: null
   }
 });
 

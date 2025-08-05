@@ -4,6 +4,8 @@ import Navbar from "./components/Navbar.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import Login from "./auth/Login.jsx";
 import Signup from "./auth/Signup.jsx";
+import ForgotPassword from './auth/ForgotPassword.jsx';
+import ResetPassword from './auth/ResetPassword.jsx';
 import Dashboard from "./pages/Dashboard.jsx";
 import Home from "./pages/Home.jsx";
 import Appointments from "./pages/Appointments.jsx";
@@ -18,11 +20,14 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/dashboard" element={
             <PrivateRoute>
               <Dashboard />
             </PrivateRoute>
           } />
+
           <Route path="/appointments" element={
             <PrivateRoute>
               <Appointments />
@@ -43,6 +48,7 @@ function App() {
               <Home />
             </PrivateRoute>
           } />
+          
         </Routes>
       </Router>
     </AuthProvider>

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import show from "../assets/show.svg";
+import unshow from "../assets/disable.svg";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -17,7 +19,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:3000/login', { email, password });
+      const res = await axios.post(`http://localhost:3000/login`, { email, password });
       // Backend should return { token, user }
       localStorage.setItem('token', res.data.token); // Optional: save token
       login(res.data.user); // Set user in context
@@ -69,15 +71,28 @@ const Login = () => {
             />
             <span
               onClick={togglePasswordVisibility}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
             >
-              {showPassword ? '🙈' : '👁️'}
+              <img 
+                src={showPassword ? show : unshow} 
+                alt={showPassword ? "Hide password" : "Show password"} 
+                className="w-6 h-6"
+              />
             </span>
+          </div>
+          <div className="flex justify-end mt-2">
+            <Link 
+              to="/forgot-password" 
+              className="text-blue-600 hover:underline text-sm font-medium"
+            >
+              Forgot password?
+            </Link>
           </div>
         </div>
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200">
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200"
+        >
           Login
         </button>
         <p className="text-center text-sm text-gray-600">
@@ -90,4 +105,5 @@ const Login = () => {
     </div>
   );
 };
+
 export default Login;
