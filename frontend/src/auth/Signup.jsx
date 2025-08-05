@@ -1,8 +1,211 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import show from "../assets/show.svg";
 import unshow from "../assets/disable.svg";
+
+// --- FloatingLabelInput ---
+const FloatingLabelInput = ({
+  type = "text",
+  name,
+  value,
+  onChange,
+  label,
+  required = false,
+  rightIcon,
+  onRightIconClick,
+  as, // allow 'select' as well
+  children,
+  ...rest
+}) => (
+  <StyledWrapper>
+    <div className="container">
+      {as === 'select' ? (
+        <select
+          required={required}
+          name={name}
+          className="input"
+          value={value}
+          onChange={onChange}
+          {...rest}
+        >
+          {children}
+        </select>
+      ) : (
+        <input
+          required={required}
+          type={type}
+          name={name}
+          className="input"
+          value={value}
+          onChange={onChange}
+          autoComplete="off"
+          {...rest}
+        />
+      )}
+      <label className="label">{label}</label>
+      {rightIcon && !as &&
+        <span className="icon" onClick={onRightIconClick}>
+          {rightIcon}
+        </span>
+      }
+    </div>
+  </StyledWrapper>
+);
+
+const StyledWrapper = styled.div`
+  .container {
+    position: relative;
+    color: white;
+    margin-bottom: 1.5rem;
+  }
+
+  .container .label {
+    font-size: 15px;
+    position: absolute;
+    top: 13px;
+    left: 10px;
+    transition: 0.3s;
+    pointer-events: none;
+    color: #fff;
+    background: #091732;
+    padding: 0 4px;
+  }
+
+  .input {
+    width: 100%;
+    height: 45px;
+    border: none;
+    outline: none;
+    padding: 0 40px 0 10px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 15px;
+    background: #091732;
+    background-color: transparent;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 1),
+      -1px -1px 6px rgba(255, 255, 255, 0.4);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+
+  .container select.input {
+    padding-right: 35px; /* space for custom arrow */
+    cursor: pointer;
+  }
+
+  /* Custom arrow for select */
+  .container select.input::-ms-expand {
+    display: none; /* hide default arrow in IE */
+  }
+  .container select.input {
+    background-image:
+      linear-gradient(45deg, transparent 50%, #cbd5e1 50%),
+      linear-gradient(135deg, #cbd5e1 50%, transparent 50%),
+      linear-gradient(to right, #091732, #091732);
+    background-position:
+      calc(100% - 20px) calc(50% - 3px),
+      calc(100% - 15px) calc(50% - 3px),
+      100% 0;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+  }
+
+  .input:focus {
+    border: 2px solid #4682fa;
+  }
+
+  .container .input:valid ~ .label,
+  .container .input:focus ~ .label {
+    top: -8px;
+    font-size: 13px;
+    color: #90caf9;
+  }
+
+  .icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  /* Style options to match card bg and text */
+  select option {
+    background-color: #091732 !important;
+    color: #cbd5e1 !important;
+  }
+`;
+
+const CardWrapper = styled.div`
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #dbe9fd 0%, #bad2fa 100%);
+
+  .card {
+    background: #091732;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.23);
+    width: 100%;
+    max-width: 430px;
+    color: #cbd5e1;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #90caf9;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #b6c5e2;
+    margin-bottom: 1.8rem;
+    font-size: 1rem;
+  }
+
+  button {
+    width: 100%;
+    background-color: #3b82f6;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 0;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: #2563eb;
+    }
+  }
+
+  .login-text {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    margin-top: 1.2rem;
+  }
+
+  .login-text a {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .login-text a:hover {
+    text-decoration: underline;
+  }
+`;
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -25,12 +228,10 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const res = await axios.post(`http://localhost:3000/signup`, formData, {
         headers: { 'Content-Type': 'application/json' }
       });
-
       alert('Signup successful!');
       navigate("/login");
       console.log('Response:', res.data);
@@ -41,95 +242,72 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-200 px-4">
-      <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-10 w-full max-w-md">
-        <h2 className="text-3xl font-semibold text-center text-blue-800 mb-6">Create an Account</h2>
-        <p className="text-center text-gray-600 text-sm mb-6">
-          Join our <span className="text-blue-700 font-semibold">healthcare platform</span> to connect with doctors, nurses, and patients.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Full Name
-          </label>
-          <input
+    <CardWrapper>
+      <div className="card">
+        <h2>Create an Account</h2>
+        <div className="subtitle">
+          Join our <span style={{ color: '#3b82f6', fontWeight: 600 }}>healthcare platform</span> to connect with doctors, nurses, and patients.
+        </div>
+        <form onSubmit={handleSubmit}>
+
+          <FloatingLabelInput
             type="text"
             name="name"
-            placeholder="Full Name"
+            label="Full Name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             required
           />
 
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Email Address
-          </label>
-          <input
+          <FloatingLabelInput
             type="email"
             name="email"
-            placeholder="Email Address"
+            label="Email Address"
             value={formData.email}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
             required
           />
 
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Password
-          </label>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              required
-            />
-            <span
-              onClick={togglePasswordVisibility}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-            >
+          <FloatingLabelInput
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            label="Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            rightIcon={
               <img
                 src={showPassword ? show : unshow}
                 alt={showPassword ? "Hide password" : "Show password"}
-                className="w-6 h-6"
+                style={{ width: 24, height: 24 }}
               />
-            </span>
-          </div>
+            }
+            onRightIconClick={togglePasswordVisibility}
+          />
 
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Role
-          </label>
-          <select
+          <FloatingLabelInput
+            as="select"
             name="role"
+            label="Role"
             value={formData.role}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            required
           >
             <option value="doctor">Doctor</option>
             <option value="nurse">Nurse</option>
             <option value="admin">Administrator</option>
             <option value="patient">Patient</option>
-          </select>
+          </FloatingLabelInput>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200"
-          >
-            Sign Up
-          </button>
+          <button type="submit">Sign Up</button>
 
-          <p className="text-center text-sm text-gray-600">
+          <div className="login-text">
             Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:underline font-medium">
-              Sign in
-            </Link>
-          </p>
+            <Link to="/login">Sign in</Link>
+          </div>
         </form>
       </div>
-    </div>
+    </CardWrapper>
   );
 };
 
