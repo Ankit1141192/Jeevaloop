@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -16,9 +18,11 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:3000/login', { email, password });
+      // Backend should return { token, user }
+      localStorage.setItem('token', res.data.token); // Optional: save token
+      login(res.data.user); // Set user in context
       alert('Login successful!');
-      console.log(res.data); // Handle token or user info
-      navigate('/dashboard'); // redirect after login
+      navigate('/'); // Redirect to home
     } catch (err) {
       console.error(err);
       alert('Login failed');
@@ -50,7 +54,6 @@ const Login = () => {
             required
           />
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Password
@@ -72,14 +75,11 @@ const Login = () => {
             </span>
           </div>
         </div>
-
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200"
-        >
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition duration-200">
           Login
         </button>
-
         <p className="text-center text-sm text-gray-600">
           Don&apos;t have an account?{' '}
           <Link to="/register" className="text-blue-600 hover:underline font-medium">
@@ -90,5 +90,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;
