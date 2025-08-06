@@ -141,11 +141,11 @@ const StyledWrapper = styled.div`
 `;
 
 const CardWrapper = styled.div`
-  min-height: 100vh;
+  min-height: 95vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #dbe9fd 0%, #bad2fa 100%);
+  // background: linear-gradient(135deg, #dbe9fd 0%, #bad2fa 100%);
 
   .card {
     background: #091732;
@@ -229,7 +229,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:3000/signup`, formData, {
+      const res = await axios.post(`http://localhost:3000/auth/signup`, formData, {
         headers: { 'Content-Type': 'application/json' }
       });
       alert('Signup successful!');

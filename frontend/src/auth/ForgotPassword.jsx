@@ -76,11 +76,11 @@ const StyledWrapper = styled.div`
 `;
 
 const CardWrapper = styled.div`
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #dbe9fd;
+  // background: #dbe9fd;
 
   form {
     background: #091732;
@@ -139,7 +139,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://localhost:3000/forgot-password`, { email });
+      await axios.post(`http://localhost:3000/auth/forgot-password`, { email });
       setMessage('If your email is registered, you will receive a reset link shortly.');
     } catch (err) {
       setMessage('Error sending reset link.');

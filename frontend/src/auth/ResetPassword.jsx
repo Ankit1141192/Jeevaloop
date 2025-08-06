@@ -42,7 +42,7 @@ const StyledWrapper = styled.div`
   .container {
     position: relative;
     color: white;
-    margin-bottom: 1.5rem; /* space between inputs */
+    margin-bottom: 1.5rem;
   }
 
   .container .label {
@@ -62,7 +62,7 @@ const StyledWrapper = styled.div`
     height: 45px;
     border: none;
     outline: none;
-    padding: 0 40px 0 10px; /* extra right padding for icon */
+    padding: 0 40px 0 10px;
     border-radius: 6px;
     color: #fff;
     font-size: 15px;
@@ -94,11 +94,11 @@ const StyledWrapper = styled.div`
 `;
 
 const ResetPasswordWrapper = styled.div`
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #dbe9fd;
+  // background: #dbe9fd;
 
   form {
     background: #091732;
@@ -118,20 +118,64 @@ const ResetPasswordWrapper = styled.div`
     color: #90caf9;
   }
 
+  /* Enhanced Button Styling */
   button {
     width: 100%;
-    background-color: #3b82f6;
-    color: white;
+    background: transparent;
+    color: #fff;
+    font-size: 17px;
+    text-transform: uppercase;
     font-weight: 600;
-    padding: 0.75rem 0;
     border: none;
-    border-radius: 0.5rem;
+    padding: 20px 30px;
     cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
+    perspective: 30rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.308);
+    position: relative;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
 
-    &:hover {
-      background-color: #2563eb;
+  button::before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 10px;
+    background: linear-gradient(
+      320deg,
+      rgba(0, 140, 255, 0.678),
+      rgba(128, 0, 128, 0.308)
+    );
+    z-index: 1;
+    transition: background 0.3s;
+  }
+
+  button:hover::before {
+    animation: rotate 1s;
+    transition: all 0.5s;
+    background: linear-gradient(
+      320deg,
+      rgba(0, 140, 255, 0.9),
+      rgba(128, 0, 128, 0.6)
+    );
+  }
+
+  button span {
+    position: relative;
+    z-index: 2;
+  }
+
+  @keyframes rotate {
+    0% {
+      transform: rotateY(180deg);
+    }
+    100% {
+      transform: rotateY(360deg);
     }
   }
 
@@ -160,7 +204,7 @@ const ResetPassword = () => {
       return;
     }
     try {
-      await axios.post(`http://localhost:3000/reset-password/${token}`, { password });
+      await axios.post(`http://localhost:3000/auth/reset-password/${token}`, { password });
       setMessage('Password reset successful, redirecting to login...');
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
@@ -207,7 +251,9 @@ const ResetPassword = () => {
           onRightIconClick={() => setShowPassword2((v) => !v)}
         />
 
-        <button type="submit">Reset Password</button>
+        <button type="submit">
+          <span>Reset Password</span>
+        </button>
 
         {message && <p className="message">{message}</p>}
       </form>

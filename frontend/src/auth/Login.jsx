@@ -97,11 +97,11 @@ const StyledWrapper = styled.div`
 `;
 
 const CardWrapper = styled.div`
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #dbe9fd;
+  // background: #dbe9fd;
 
   form {
     background: #091732;
@@ -196,7 +196,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:3000/login`, { email, password });
+      const res = await axios.post(`http://localhost:3000/auth/login`, { email, password });
       localStorage.setItem('token', res.data.token);
       login(res.data.user);
       alert('Login successful!');
