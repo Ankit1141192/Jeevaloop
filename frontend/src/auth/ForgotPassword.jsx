@@ -139,7 +139,7 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`http://localhost:3000/auth/forgot-password`, { email });
+      await axios.post(`https://jeevaloop.onrender.com/auth/forgot-password`, { email });
       setMessage('If your email is registered, you will receive a reset link shortly.');
     } catch (err) {
       setMessage('Error sending reset link.');

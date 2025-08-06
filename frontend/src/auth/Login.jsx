@@ -196,7 +196,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:3000/auth/login`, { email, password });
+      const res = await axios.post(`https://jeevaloop.onrender.com/auth/login`, { email, password });
       localStorage.setItem('token', res.data.token);
       login(res.data.user);
       alert('Login successful!');
@@ -234,7 +234,7 @@ const Login = () => {
           onChange={e => setPassword(e.target.value)}
           rightIcon={
             <img
-              src={showPassword ? unshow : show}
+              src={showPassword ? show : unshow}
               alt={showPassword ? "Hide password" : "Show password"}
               style={{ width: 24, height: 24 }}
             />
