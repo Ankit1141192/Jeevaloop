@@ -11,6 +11,7 @@ import Home from "./pages/Home.jsx";
 import Appointments from "./pages/Appointments.jsx";
 import Patients from "./pages/Patients.jsx";
 import Contact from "./pages/Contact.jsx";
+import Footer from "./components/Footer.jsx";
 
 function App() {
   return (
@@ -21,7 +22,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/reset-password/token" element={<ResetPassword />} />
           <Route path="/dashboard" element={
             <PrivateRoute>
               <Dashboard />
@@ -50,6 +51,7 @@ function App() {
           } />
           
         </Routes>
+        <Footer/>
       </Router>
     </AuthProvider>
   );

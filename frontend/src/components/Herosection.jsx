@@ -29,9 +29,9 @@ const Herosection = () => {
                   Access Dashboard
                 </button>
               </Link>
-              <Link to="/request-demo">
+              <Link to="/appointments">
                 <button className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-blue-50 transition-colors duration-200 cursor-pointer whitespace-nowrap">
-                  Request Demo
+                  Appointments
                 </button>
               </Link>
             </div>

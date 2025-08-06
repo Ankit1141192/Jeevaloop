@@ -1,7 +1,13 @@
 import Herosection from "../components/Herosection";
-import Features from "../components/Features";
+
+import Feature from "../components/Feature";
+import Stats from "../components/Stats";
+
 
 const Home = () => <div className="p-4"><Herosection/>
- <Features/>
+ {/* <Features/> */}
+ <Feature/>
+ <Stats/>
+ 
 </div>;
 export default Home;
