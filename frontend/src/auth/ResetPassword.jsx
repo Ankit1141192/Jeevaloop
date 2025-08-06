@@ -204,7 +204,7 @@ const ResetPassword = () => {
       return;
     }
     try {
-      await axios.post(`https://jeevaloop.onrender.com/auth/reset-password/${token}`, { password });
+      await axios.post(`https://jeevaloop.onrender.com/reset-password/${token}`, { password });
       setMessage('Password reset successful, redirecting to login...');
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
