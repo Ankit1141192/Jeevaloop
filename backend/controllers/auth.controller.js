@@ -82,7 +82,7 @@ const forgotPasswordControllers =  async (req, res) => {
 
     await user.save();
 
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const resetUrl = `https://jeevaloop.vercel.app/reset-password/${resetToken}`;
 
     const mailOptions = {
   from: process.env.EMAIL_USER,
