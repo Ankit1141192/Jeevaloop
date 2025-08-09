@@ -3,7 +3,11 @@ import axios from "axios";
 
 export default function Appointment() {
   const [appointments, setAppointments] = useState([]);
-  const [formData, setFormData] = useState({ appointmentDate: "", doctor: "", reason: "" });
+  const [formData, setFormData] = useState({
+    appointmentDate: "",
+    doctor: "",
+    reason: ""
+  });
   const [loading, setLoading] = useState(false);
   const [doctors, setDoctors] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -23,7 +27,7 @@ export default function Appointment() {
     try {
       setLoading(true);
       const res = await axios.get(API_BASE, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
       setAppointments(res.data || []);
     } catch {
@@ -38,7 +42,7 @@ export default function Appointment() {
     if (!token) return;
     try {
       const res = await axios.get(`${USERS_BASE}?role=doctor`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
       setDoctors(res.data || []);
     } catch {
@@ -67,7 +71,7 @@ export default function Appointment() {
           patient: user._id,
           doctor: formData.doctor,
           appointmentDate: formData.appointmentDate,
-          reason: formData.reason,
+          reason: formData.reason
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -97,12 +101,25 @@ export default function Appointment() {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_BASE}/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` }
       });
       fetchAppointments();
     } catch (err) {
       alert(err.response?.data?.msg || "Error deleting appointment");
     }
+  };
+
+  // Filter: for doctors, show only their appointments
+  const filteredAppointments = isDoctor
+    ? appointments.filter(appt => appt.doctor?._id === user._id)
+    : appointments;
+
+  // Map status to color classes
+  const statusClass = (status) => {
+    if (status === "confirmed") return "bg-blue-100 text-blue-700";
+    if (status === "pending") return "bg-yellow-100 text-yellow-700";
+    if (status === "completed") return "bg-green-100 text-green-700";
+    return "bg-gray-200 text-gray-600";
   };
 
   return (
@@ -120,12 +137,10 @@ export default function Appointment() {
       )}
 
       {isPatientOrNurse && showForm && (
-        <form
-          onSubmit={handleCreate}
+        <form onSubmit={handleCreate}
           className="mb-6 border p-4 rounded shadow bg-white"
         >
           <h2 className="text-lg font-semibold mb-4">Book an Appointment</h2>
-
           <label className="block mb-3">
             Date &amp; Time:
             <input
@@ -136,7 +151,6 @@ export default function Appointment() {
               required
             />
           </label>
-
           <label className="block mb-3">
             Doctor:
             <select
@@ -157,7 +171,6 @@ export default function Appointment() {
               )}
             </select>
           </label>
-
           <label className="block mb-3">
             Reason:
             <textarea
@@ -166,7 +179,6 @@ export default function Appointment() {
               className="border p-2 w-full mt-1 rounded"
             ></textarea>
           </label>
-
           <div className="flex gap-2 mt-4">
             <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">
               Submit
@@ -187,10 +199,10 @@ export default function Appointment() {
         <p>Loading...</p>
       ) : (
         <div className="space-y-4">
-          {appointments.length === 0 ? (
+          {filteredAppointments.length === 0 ? (
             <p className="text-gray-500">No appointments found.</p>
           ) : (
-            appointments.map((appt) => (
+            filteredAppointments.map((appt) => (
               <div
                 key={appt._id}
                 className="border p-4 rounded shadow-sm bg-white flex justify-between items-start"
@@ -203,10 +215,20 @@ export default function Appointment() {
                       : ""}
                   </p>
                   <p>
-                    <strong>Doctor:</strong> {appt.doctor?.name || "Unknown"}
+                    <strong>Doctor:</strong>{" "}
+                    {appt.doctor?.name || "Unknown"}
                   </p>
                   <p>
-                    <strong>Patient:</strong> {appt.patient?.name || "Unknown"}
+                    <strong>Patient:</strong>{" "}
+                    {appt.patient?.name || "Unknown"}
+                  </p>
+                  <p>
+                    <strong>Patient Email:</strong>{" "}
+                    {appt.patient?.email || "N/A"}
+                  </p>
+                  <p>
+                    <strong>Patient Age/Gender:</strong>{" "}
+                    {appt.patient?.age ? `${appt.patient.age} yrs` : "N/A"} {appt.patient?.gender || ""}
                   </p>
                   {appt.reason && (
                     <p>
@@ -214,28 +236,29 @@ export default function Appointment() {
                     </p>
                   )}
                   <span
-                    className={`inline-block mt-2 px-3 py-1 text-sm rounded-full ${
-                      appt.status === "confirmed"
-                        ? "bg-green-100 text-green-700"
-                        : appt.status === "pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : appt.status === "completed"
-                        ? "bg-blue-100 text-blue-700"
-                        : "bg-gray-200 text-gray-600"
-                    }`}
+                    className={`inline-block mt-2 px-3 py-1 text-sm rounded-full ${statusClass(appt.status)}`}
                   >
                     {appt.status}
                   </span>
                 </div>
-
                 {/* Action buttons for doctor/admin */}
                 <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleUpdateStatus(appt._id, "completed")}
-                    className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm"
-                  >
-                    Complete
-                  </button>
+                  {isDoctor && appt.status === "pending" && (
+                    <button
+                      onClick={() => handleUpdateStatus(appt._id, "confirmed")}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm"
+                    >
+                      Approve
+                    </button>
+                  )}
+                  {isDoctor && appt.status === "confirmed" && (
+                    <button
+                      onClick={() => handleUpdateStatus(appt._id, "completed")}
+                      className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm"
+                    >
+                      Complete
+                    </button>
+                  )}
                   <button
                     onClick={() => handleDelete(appt._id)}
                     className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm"
