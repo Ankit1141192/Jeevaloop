@@ -10,7 +10,10 @@ const Contact = () => {
     message: '',
   });
 
-  // Handle input changes
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState('');
+
+  // Handle input changes uniformly
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -19,30 +22,67 @@ const Contact = () => {
     }));
   };
 
-  // Handle form submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // For now, just log form data (replace with your submit logic)
-    console.log('Form Data Submitted:', formData);
+  // Validate form input before submit (basic example)
+  const validateForm = () => {
+    const { name, email, subject, message } = formData;
+    if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
+      return false;
+    }
+    // Basic email validation pattern
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
+  };
 
-    // Reset form (optional)
-    setFormData({
-      name: '',
-      email: '',
-      department: 'general',
-      subject: '',
-      message: '',
-    });
-    alert('Message sent successfully!'); // Simple feedback
+  // Handle form submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) {
+      setSubmitStatus('validation-error');
+      return;
+    }
+    setIsSubmitting(true);
+    setSubmitStatus('');
+
+    try {
+      const scriptURL =
+        'https://script.google.com/macros/s/AKfycbwjkWo9juZ-x4Obsb69VkO3ax1pRkrrTrcSqPVB1_7SdYXxI16oTG5lCC7i_iORFgHkPw/exec';
+
+      const googleFormData = new FormData();
+      googleFormData.append('Name', formData.name);
+      googleFormData.append('Email', formData.email);
+      googleFormData.append('Department', formData.department);
+      googleFormData.append('Subject', formData.subject);
+      googleFormData.append('Message', formData.message);
+
+      const response = await fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', // Google Apps Script often requires 'no-cors'
+        body: googleFormData,
+      });
+
+      // Since mode:'no-cors' won't give a proper response, we assume success after fetch
+      setSubmitStatus('success');
+      setFormData({
+        name: '',
+        email: '',
+        department: 'general',
+        subject: '',
+        message: '',
+      });
+    } catch (error) {
+      setSubmitStatus('error');
+      console.error('Error submitting form:', error);
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmitStatus(''), 5000);
+    }
   };
 
   return (
-    <div className=" py-16 min-h-screen">
+    <div className="py-16 min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Contact Us
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Contact Us</h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Get in touch with our healthcare technology experts for support, demos, or partnership opportunities.
           </p>
@@ -70,6 +110,7 @@ const Contact = () => {
                     required
                   />
                 </div>
+
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
@@ -140,10 +181,21 @@ const Contact = () => {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap"
+                disabled={isSubmitting}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap disabled:opacity-50"
               >
-                Send Message
+                {isSubmitting ? 'Sending...' : 'Send Message'}
               </button>
+
+              {submitStatus === 'success' && (
+                <p className="text-green-600 mt-4">Your message has been sent successfully!</p>
+              )}
+              {submitStatus === 'error' && (
+                <p className="text-red-600 mt-4">There was an error sending your message. Please try again.</p>
+              )}
+              {submitStatus === 'validation-error' && (
+                <p className="text-red-600 mt-4">Please fill all fields correctly before submitting.</p>
+              )}
             </form>
           </div>
 
@@ -180,9 +232,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Address</p>
-                    <p className="text-gray-600">
-                      123 Healthcare Blvd, Medical District, NY 10001
-                    </p>
+                    <p className="text-gray-600">123 Healthcare Blvd, Medical District, NY 10001</p>
                   </div>
                 </div>
               </div>
@@ -211,14 +261,14 @@ const Contact = () => {
             {/* Google Map */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <iframe
-                src="https://maps.google.com/maps?width=100%&height=300&hl=en&q=New%20York,%20NY&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?width=100%&height=300&hl=en&q=Kanpur,%20India&t=&z=13&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="300"
                 style={{ border: 0 }}
                 allowFullScreen=""
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Google Map New York"
+                title="Google Map Kanpur"
               />
             </div>
           </div>

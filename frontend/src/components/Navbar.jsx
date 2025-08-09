@@ -53,19 +53,28 @@ const Navbar = () => {
             </button>
             {showDropdown && (
               <div
-                className="absolute right-0 mt-2 bg-white border rounded shadow-md w-40 z-10"
+                className="absolute left-0 right-0 mt-3 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 dark:bg-gray-700 dark:divide-gray-600"
                 onMouseLeave={() => setShowDropdown(false)}
               >
-                <span className="block px-4 py-2 text-gray-700 break-words">{user.name}</span>
-                <span className="block px-4 py-2 text-gray-700 break-words">{user.role}</span>
-                <button
-                  className="w-full text-left px-4 py-2 hover:bg-gray-200"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
+                <div className="py-2">
+                  <span className="block px-4 py-2 text-gray-700 dark:text-gray-200 break-words">
+                    {user.name}
+                  </span>
+                  <span className="block px-4 py-2 text-sm text-gray-500 dark:text-gray-400 break-words">
+                    {user.role}
+                  </span>
+                </div>
+                <div className="py-1">
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </div>
               </div>
             )}
+
           </div>
         )}
       </div>
