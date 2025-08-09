@@ -3,79 +3,63 @@ import axios from "axios";
 
 export default function Appointment() {
   const [appointments, setAppointments] = useState([]);
-  const [formData, setFormData] = useState({
-    appointmentDate: "",
-    doctor: "",
-    reason: "",
-  });
+  const [formData, setFormData] = useState({ appointmentDate: "", doctor: "", reason: "" });
   const [loading, setLoading] = useState(false);
   const [doctors, setDoctors] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
-  // AUTH DATA
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // Only patient or nurse can book
-  const allowedToBook = user.role === "patient" || user.role === "nurse";
+  const isPatientOrNurse = user.role === "patient" || user.role === "nurse";
+  const isDoctor = user.role === "doctor";
 
   const API_BASE = "https://jeevaloop.onrender.com/appointments";
   const USERS_BASE = "https://jeevaloop.onrender.com/users";
 
-  // --- Fetch all appointments the user is allowed to see ---
+  // Fetch appointments
   const fetchAppointments = async () => {
-    if (!token) {
-      setAppointments([]);
-      return;
-    }
+    if (!token) return setAppointments([]);
     try {
       setLoading(true);
       const res = await axios.get(API_BASE, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAppointments(res.data || []);
-    } catch (err) {
+    } catch {
       setAppointments([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // --- Fetch all doctors for dropdown (for booking) ---
+  // Fetch doctors for patient/nurse dropdown
   const fetchDoctors = async () => {
-    if (!token) {
-      setDoctors([]);
-      return;
-    }
+    if (!token) return;
     try {
-      const res = await axios.get(
-        `${USERS_BASE}?role=doctor`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await axios.get(`${USERS_BASE}?role=doctor`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setDoctors(res.data || []);
-    } catch (err) {
+    } catch {
       setDoctors([]);
     }
   };
 
-  // --- Run fetches on mount or login/role change ---
   useEffect(() => {
     if (token) {
       fetchAppointments();
-      if (allowedToBook) fetchDoctors();
-    } else {
-      setAppointments([]);
-      setDoctors([]);
+      if (isPatientOrNurse) fetchDoctors();
     }
     // eslint-disable-next-line
-  }, [token, allowedToBook]);
+  }, [token]);
 
-  // --- Create appointment ---
+  // Create appointment
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!token) return alert("You must be logged in.");
     if (!formData.doctor || !formData.appointmentDate)
       return alert("Please select a doctor and date/time.");
+
     try {
       await axios.post(
         API_BASE,
@@ -91,17 +75,12 @@ export default function Appointment() {
       setShowForm(false);
       fetchAppointments();
     } catch (err) {
-      alert(
-        err.response?.data?.msg ||
-        err.response?.data?.error ||
-        "Error creating appointment"
-      );
+      alert(err.response?.data?.msg || "Error creating appointment");
     }
   };
 
-  // --- Update appointment status ---
+  // Update status
   const handleUpdateStatus = async (id, status) => {
-    if (!token) return alert("You must be logged in.");
     try {
       await axios.put(
         `${API_BASE}/${id}`,
@@ -110,69 +89,60 @@ export default function Appointment() {
       );
       fetchAppointments();
     } catch (err) {
-      alert(
-        err.response?.data?.msg ||
-        err.response?.data?.error ||
-        "Error updating status"
-      );
+      alert(err.response?.data?.msg || "Error updating status");
     }
   };
 
-  // --- Delete appointment ---
+  // Delete appointment
   const handleDelete = async (id) => {
-    if (!token) return alert("You must be logged in.");
     try {
       await axios.delete(`${API_BASE}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchAppointments();
     } catch (err) {
-      alert(
-        err.response?.data?.msg ||
-        err.response?.data?.error ||
-        "Error deleting appointment"
-      );
+      alert(err.response?.data?.msg || "Error deleting appointment");
     }
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
+    <div className="p-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Appointments</h1>
 
-      {/* Book Appointment Button (ONLY patient & nurse) */}
-      {allowedToBook && !showForm && (
+      {/* Book Appointment for Patients/Nurses */}
+      {isPatientOrNurse && !showForm && (
         <button
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mb-4"
           onClick={() => setShowForm(true)}
         >
           Book Appointment
         </button>
       )}
 
-      {/* Appointment Form (ONLY patient & nurse: select doctor) */}
-      {allowedToBook && showForm && (
-        <form onSubmit={handleCreate} className="mb-6 border p-4 rounded shadow">
-          <h2 className="text-lg font-semibold mb-2">Book an Appointment</h2>
-          <label className="block mb-2">
+      {isPatientOrNurse && showForm && (
+        <form
+          onSubmit={handleCreate}
+          className="mb-6 border p-4 rounded shadow bg-white"
+        >
+          <h2 className="text-lg font-semibold mb-4">Book an Appointment</h2>
+
+          <label className="block mb-3">
             Date &amp; Time:
             <input
               type="datetime-local"
               value={formData.appointmentDate}
-              onChange={(e) =>
-                setFormData({ ...formData, appointmentDate: e.target.value })
-              }
-              className="border p-2 w-full"
+              onChange={(e) => setFormData({ ...formData, appointmentDate: e.target.value })}
+              className="border p-2 w-full mt-1 rounded"
               required
             />
           </label>
-          <label className="block mb-2">
+
+          <label className="block mb-3">
             Doctor:
             <select
               value={formData.doctor}
-              onChange={(e) =>
-                setFormData({ ...formData, doctor: e.target.value })
-              }
-              className="border p-2 w-full"
+              onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
+              className="border p-2 w-full mt-1 rounded"
               required
             >
               <option value="">Select Doctor</option>
@@ -187,21 +157,18 @@ export default function Appointment() {
               )}
             </select>
           </label>
-          <label className="block mb-2">
+
+          <label className="block mb-3">
             Reason:
             <textarea
               value={formData.reason}
-              onChange={(e) =>
-                setFormData({ ...formData, reason: e.target.value })
-              }
-              className="border p-2 w-full"
+              onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+              className="border p-2 w-full mt-1 rounded"
             ></textarea>
           </label>
+
           <div className="flex gap-2 mt-4">
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded"
-            >
+            <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">
               Submit
             </button>
             <button
@@ -215,18 +182,18 @@ export default function Appointment() {
         </form>
       )}
 
-      {/* Appointment List (visible for ALL users) */}
+      {/* Appointment List */}
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <ul className="space-y-4">
+        <div className="space-y-4">
           {appointments.length === 0 ? (
-            <p>No appointments found.</p>
+            <p className="text-gray-500">No appointments found.</p>
           ) : (
             appointments.map((appt) => (
-              <li
+              <div
                 key={appt._id}
-                className="border p-4 rounded shadow flex justify-between items-center"
+                className="border p-4 rounded shadow-sm bg-white flex justify-between items-start"
               >
                 <div>
                   <p>
@@ -241,33 +208,45 @@ export default function Appointment() {
                   <p>
                     <strong>Patient:</strong> {appt.patient?.name || "Unknown"}
                   </p>
-                  <p>
-                    <strong>Status:</strong> {appt.status}
-                  </p>
                   {appt.reason && (
                     <p>
                       <strong>Reason:</strong> {appt.reason}
                     </p>
                   )}
+                  <span
+                    className={`inline-block mt-2 px-3 py-1 text-sm rounded-full ${
+                      appt.status === "confirmed"
+                        ? "bg-green-100 text-green-700"
+                        : appt.status === "pending"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : appt.status === "completed"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-gray-200 text-gray-600"
+                    }`}
+                  >
+                    {appt.status}
+                  </span>
                 </div>
-                <div className="flex gap-2">
+
+                {/* Action buttons for doctor/admin */}
+                <div className="flex gap-2 mt-2">
                   <button
                     onClick={() => handleUpdateStatus(appt._id, "completed")}
-                    className="bg-green-600 text-white px-2 py-1 rounded"
+                    className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-sm"
                   >
                     Complete
                   </button>
                   <button
                     onClick={() => handleDelete(appt._id)}
-                    className="bg-red-600 text-white px-2 py-1 rounded"
+                    className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm"
                   >
                     Delete
                   </button>
                 </div>
-              </li>
+              </div>
             ))
           )}
-        </ul>
+        </div>
       )}
     </div>
   );
